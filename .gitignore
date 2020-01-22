@@ -10,6 +10,7 @@ project/plugins/project/
 
 *.class
 *.log
+.DS_Store
 
 # sbt specific
 .cache

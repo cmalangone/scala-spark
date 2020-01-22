@@ -23,18 +23,17 @@ object Server extends App {
 
   scala.sys.addShutdownHook(() -> shutdown())
 
-	  val route: Route =
-	      (post & path("graphql")) {
-	        entity(as[JsValue]) { requestJson =>
-	          GraphQLServer.endpoint(requestJson)
-	        }
-	      } ~ {
-	        getFromResource("graphiql.html")
-	      }
+  val route: Route =
+    (post & path("graphql")) {
+      entity(as[JsValue]) { requestJson =>
+        GraphQLServer.endpoint(requestJson)
+      }
+    } ~ {
+      getFromResource("graphiql.html")
+    }
 
   Http().bindAndHandle(route, "0.0.0.0", PORT)
   println(s"open a browser with URL: http://localhost:$PORT")
-
 
   def shutdown(): Unit = {
     actorSystem.terminate()

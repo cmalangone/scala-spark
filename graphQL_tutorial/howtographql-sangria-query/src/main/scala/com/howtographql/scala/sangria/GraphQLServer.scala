@@ -13,7 +13,6 @@ import sangria.execution._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import sangria.marshalling.sprayJson._
 
-
 object GraphQLServer {
 
   private val dao = DBSchema.createDatabase
@@ -32,7 +31,7 @@ object GraphQLServer {
 
         val variables = fields.get("variables") match {
           case Some(obj: JsObject) => obj
-          case _ => JsObject.empty
+          case _                   => JsObject.empty
         }
         complete(executeGraphQLQuery(queryAst, operation, variables))
       case Failure(error) =>
@@ -41,18 +40,25 @@ object GraphQLServer {
 
   }
 
-  private def executeGraphQLQuery(query: Document, operation: Option[String], vars: JsObject)(implicit ec: ExecutionContext) = {
-    Executor.execute(
-      GraphQLSchema.SchemaDefinition, // 10
-      query, // 11
-      MyContext(dao), // 12
-      variables = vars, // 13
-      operationName = operation // 14
-    ).map(OK -> _)
+  private def executeGraphQLQuery(
+      query: Document,
+      operation: Option[String],
+      vars: JsObject
+  )(implicit ec: ExecutionContext) = {
+    Executor
+      .execute(
+        GraphQLSchema.SchemaDefinition, // 10
+        query, // 11
+        MyContext(dao), // 12
+        variables = vars, // 13
+        operationName = operation // 14
+      )
+      .map(OK -> _)
       .recover {
-      case error: QueryAnalysisError => BadRequest -> error.resolveError
-      case error: ErrorWithResolver => InternalServerError -> error.resolveError
-    }
+        case error: QueryAnalysisError => BadRequest -> error.resolveError
+        case error: ErrorWithResolver =>
+          InternalServerError -> error.resolveError
+      }
   }
 
 }
